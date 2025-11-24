@@ -4,34 +4,32 @@ class Program
 {
     static void Main()
     {
-        var pipeline = new OrderPipeline();
-        OrderStep checkStock = CheckStock;
-        OrderStep calculateDelivery = CalculateDelivery;
-        OrderStep sendConfirmation = (ctx) => ctx.IsConfirmed = true;
+        var label = new Label
+        {
+            Color = "Red",
+            IsVisible = true
+        };
+        Console.WriteLine("Label тест:");
+        Console.WriteLine(label.Draw());
 
-        pipeline.OrderStep += checkStock;
-        pipeline.OrderStep += calculateDelivery;
-        pipeline.OrderStep += sendConfirmation;
-        var ctx = new OrderContext();
+        label.IsVisible = false;
+        Console.WriteLine(label.Draw()); 
 
-        pipeline.Run(ctx);
 
-        Console.WriteLine($"HasStock: {ctx.HasStock}");
-        Console.WriteLine($"DeliveryCost: {ctx.DeliveryCost}");
-        Console.WriteLine($"IsConfirmed: {ctx.IsConfirmed}");
+        // прямоугольник
+        var rectSmall = new Rectangle(
+            color: "Blue",
+            width: 1,
+            height: 1,
+            minVisibleArea: 2);
 
-        pipeline.OrderStep -= checkStock;
-        pipeline.OrderStep -= calculateDelivery;
-        pipeline.OrderStep -= sendConfirmation;
-    }
+        Console.WriteLine("\nФигура слишком маленькая:");
+        Console.WriteLine(rectSmall.Draw());
 
-    static void CheckStock(OrderContext ctx)
-    {
-        ctx.HasStock = true;
-    }
+        rectSmall.Resize(3);
+        Console.WriteLine(rectSmall.Draw());
 
-    static void CalculateDelivery(OrderContext ctx)
-    {
-        ctx.DeliveryCost = 200;
+        rectSmall.IsVisible = false;
+        Console.WriteLine(rectSmall.Draw());
     }
 }

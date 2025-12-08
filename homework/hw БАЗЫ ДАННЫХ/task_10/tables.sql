@@ -1,0 +1,52 @@
+DROP TABLE IF EXISTS ALBUM_CONTRIBUTOR CASCADE;
+DROP TABLE IF EXISTS ALBUM_INFO CASCADE;
+DROP TABLE IF EXISTS ALBUM CASCADE;
+DROP TABLE IF EXISTS ARTIST CASCADE;
+
+CREATE TABLE ARTIST (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    country TEXT
+);
+
+CREATE TABLE ALBUM (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    release_year SMALLINT NOT NULL CHECK(release_year >= 1900 AND release_year <= EXTRACT(YEAR FROM CURRENT_DATE)),
+    primary_artist_id INT REFERENCES ARTIST(id) ON DELETE RESTRICT NOT NULL
+);
+
+CREATE TABLE ALBUM_INFO (
+    album_id INT PRIMARY KEY REFERENCES ALBUM(id) ON DELETE CASCADE,
+    upc CHAR(12) UNIQUE NOT NULL,
+    label TEXT,
+    duration_minutes SMALLINT NOT NULL CHECK(duration_minutes > 0)
+);
+
+CREATE TABLE ALBUM_CONTRIBUTOR (
+    album_id INT REFERENCES ALBUM(id) ON DELETE CASCADE,
+    artist_id INT REFERENCES ARTIST(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    PRIMARY KEY(album_id, artist_id, role)
+);
+
+INSERT INTO ARTIST(name, country) VALUES
+('John Doe', 'USA'),
+('Jane Smith', 'UK');
+
+INSERT INTO ALBUM(title, release_year, primary_artist_id) VALUES
+('First Album', 2020, 1),
+('Second Album', 2022, 2);
+
+INSERT INTO ALBUM_INFO(album_id, upc, label, duration_minutes) VALUES
+(1, '123456789012', 'Label A', 60),
+(2, '234567890123', 'Label B', 55);
+
+INSERT INTO ALBUM_CONTRIBUTOR(album_id, artist_id, role) VALUES
+(1, 1, 'Producer'),
+(2, 2, 'Featured Artist');
+
+DELETE FROM ARTIST WHERE id=1;
+
+
+DELETE FROM ALBUM WHERE id=1;

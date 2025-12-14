@@ -1,0 +1,58 @@
+SELECT 
+  order_id,
+  status,
+  region,
+  CASE
+    WHEN status IN ('paid', 'shipped') THEN amount - discount + shipping_fee
+    ELSE 0
+  END AS net_revenue,
+  CASE
+    WHEN amount <= 150 THEN 'low'
+    WHEN amount BETWEEN 151 AND 220 THEN 'mid'
+    ELSE 'high'
+  END AS ticket_band
+FROM orders
+ORDER BY order_date, order_id;
+
+SELECT 
+  order_id,
+  channel,
+  amount
+FROM orders
+WHERE amount > CASE
+  WHEN channel = 'online' THEN 150
+  WHEN channel = 'store' THEN 200
+  WHEN channel = 'partner' THEN 180
+  ELSE 0
+END;
+
+SELECT 
+  region,
+  COUNT(*) AS total_orders,
+  SUM(amount) AS total_amount,
+  AVG(discount) AS avg_discount,
+  MAX(shipping_fee) AS max_shipping_fee
+FROM orders
+GROUP BY region
+ORDER BY total_amount DESC;
+
+SELECT 
+  region,
+  SUM(amount - discount + shipping_fee) FILTER (WHERE status IN ('paid', 'shipped')) AS delivered_revenue,
+  COUNT(*) FILTER (WHERE status = 'returned') AS returns_cnt,
+  (COUNT(*) FILTER (WHERE status='returned')::numeric / COUNT(*)) AS return_rate
+FROM orders
+GROUP BY region
+ORDER BY return_rate DESC;
+
+SELECT 
+  payment_method,
+  COUNT(*) AS total_orders,
+  COUNT(*) FILTER (WHERE status='returned') AS returns_cnt,
+  SUM(amount - discount + shipping_fee) AS delivered_revenue
+FROM orders
+GROUP BY payment_method
+HAVING 
+  (COUNT(*) FILTER (WHERE status='returned')::numeric / COUNT(*)) > 0.12
+  OR 
+  SUM(amount - discount + shipping_fee) > 800;
